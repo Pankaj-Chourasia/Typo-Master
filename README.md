@@ -1,2 +1,2 @@
 # Typo-Master
- A typing speed wevb application
+ A typing mastering web based application with dashboard of info about your typing speed and your accuracy.
