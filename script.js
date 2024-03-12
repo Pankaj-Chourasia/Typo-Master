@@ -4,18 +4,32 @@ const quoteInputElement = document.getElementById("quoteInput");
 const timerElement = document.getElementById("timer");
 const wpmElement = document.getElementById("wpm");
 const accuracyElement = document.getElementById("accuracy");
+let selectedTime = 0;
 
 let timerInterval;
 let timerSeconds;
+let startTime;
+let currentQuote;
+let isTypingAllowed = true;
 
-function startTimer(seconds) {
-  timerSeconds = seconds;
-  document.getElementById("timer-selection").classList.add("hidden");
-  document.getElementById("typing-container").classList.remove("hidden");
-  document.getElementById("results-container").classList.add("hidden");
-  renderNewQuote();
-  startCountdown();
+function startTimer(duration) {
+  selectedTime = duration; 
+  timerSeconds = duration;
+  timerElement.innerText = timerSeconds;
+
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    timerElement.innerText = timerSeconds;
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      showResults();
+    }
+    if (timerSeconds === duration - 1) {
+      renderNewQuote(); 
+    }
+  }, 1000);
 }
+
 
 function startCountdown() {
   let countdown = timerSeconds;
@@ -43,9 +57,14 @@ function showResults() {
 
   document.getElementById("typing-container").classList.add("hidden");
   document.getElementById("results-container").classList.remove("hidden");
+  quoteInputElement.disabled = true;
+  isTypingAllowed = false;
 }
 
+
 quoteInputElement.addEventListener("input", () => {
+  if (!isTypingAllowed) return;
+
   const arrayQuote = quoteDisplayElement.querySelectorAll("span");
   const arrayValue = quoteInputElement.value.split("");
   let correctCount = 0;
@@ -67,20 +86,35 @@ quoteInputElement.addEventListener("input", () => {
   });
 
   if (arrayValue.length === arrayQuote.length) {
+    quoteInputElement.disabled = true;
     showResults();
+    fetchNextQuote();
   }
 });
 
 async function renderNewQuote() {
   const quote = await getRandomQuote();
+  currentQuote = quote;
   quoteDisplayElement.innerText = "";
   quote.split("").forEach((character) => {
     const characterSpan = document.createElement("span");
     characterSpan.innerText = character;
     quoteDisplayElement.appendChild(characterSpan);
   });
-  quoteInputElement.value = null;
+  quoteInputElement.value = "";
+  quoteInputElement.disabled = false;
+  quoteInputElement.focus();
+  startTime = new Date();
 }
+
+document.getElementById("restart-button").addEventListener("click", () => {
+  clearInterval(timerInterval); 
+  document.getElementById("results-container").classList.add("hidden");
+  document.getElementById("typing-container").classList.remove("hidden");
+  quoteInputElement.disabled = false; 
+  startTimer(selectedTime); 
+  renderNewQuote(); 
+});
 
 function getRandomQuote() {
   return fetch(RANDOM_QUOTE_API_URL)
