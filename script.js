@@ -45,7 +45,7 @@ function startCountdown() {
 }
 
 function showResults() {
-  const elapsedTime = timerSeconds - parseInt(document.getElementById("timer").innerText);
+  const elapsedTime = selectedTime - parseInt(document.getElementById("timer").innerText);
   const wordCount = document.getElementById("quoteDisplay").innerText.split(" ").length;
   const accuracy = calculateAccuracy(
     document.getElementById("quoteDisplay").innerText.length,
